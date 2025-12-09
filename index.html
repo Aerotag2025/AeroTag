@@ -172,7 +172,7 @@
             <!-- Home Tab Content -->
             <div id="content-home" class="dashboard-content">
                 <div class="mb-8">
-                    <h1 class="text-3xl font-bold text-white mb-2">Welcome Back!</h1>
+                    <h1 class="text-3xl font-bold text-white mb-2">Welcome to AeroTag!</h1>
                     <p class="text-slate-400">Monitor and manage your headset fleet from here.</p>
                 </div>
 
@@ -523,9 +523,17 @@
                                         id="login-password"
                                         type="password"
                                         placeholder="••••••••"
-                                        class="w-full pl-10 pr-4 py-3 bg-slate-800 border border-slate-700 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        class="w-full pl-10 pr-12 py-3 bg-slate-800 border border-slate-700 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                                         required
                                     />
+                                    <button
+                                        type="button"
+                                        onclick="togglePasswordVisibility('login-password', 'login-password-eye')"
+                                        class="absolute right-3 top-3 text-slate-400 hover:text-white transition-colors"
+                                        id="login-password-eye"
+                                    >
+                                        <i data-lucide="eye" class="w-4 h-4"></i>
+                                    </button>
                                 </div>
                             </div>
 
@@ -577,9 +585,17 @@
                                         id="signup-password"
                                         type="password"
                                         placeholder="••••••••"
-                                        class="w-full pl-10 pr-4 py-3 bg-slate-800 border border-slate-700 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        class="w-full pl-10 pr-12 py-3 bg-slate-800 border border-slate-700 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                                         required
                                     />
+                                    <button
+                                        type="button"
+                                        onclick="togglePasswordVisibility('signup-password', 'signup-password-eye')"
+                                        class="absolute right-3 top-3 text-slate-400 hover:text-white transition-colors"
+                                        id="signup-password-eye"
+                                    >
+                                        <i data-lucide="eye" class="w-4 h-4"></i>
+                                    </button>
                                 </div>
                             </div>
 
@@ -591,9 +607,17 @@
                                         id="signup-confirm-password"
                                         type="password"
                                         placeholder="••••••••"
-                                        class="w-full pl-10 pr-4 py-3 bg-slate-800 border border-slate-700 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        class="w-full pl-10 pr-12 py-3 bg-slate-800 border border-slate-700 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                                         required
                                     />
+                                    <button
+                                        type="button"
+                                        onclick="togglePasswordVisibility('signup-confirm-password', 'signup-confirm-password-eye')"
+                                        class="absolute right-3 top-3 text-slate-400 hover:text-white transition-colors"
+                                        id="signup-confirm-password-eye"
+                                    >
+                                        <i data-lucide="eye" class="w-4 h-4"></i>
+                                    </button>
                                 </div>
                             </div>
 
@@ -1129,6 +1153,27 @@
             loadTags();
         }
 
+        // Toggle password visibility
+        function togglePasswordVisibility(inputId, buttonId) {
+            const input = document.getElementById(inputId);
+            const button = document.getElementById(buttonId);
+            
+            if (!input || !button) return;
+            
+            const isPassword = input.type === 'password';
+            input.type = isPassword ? 'text' : 'password';
+            
+            // Update icon
+            const icon = button.querySelector('i');
+            if (icon) {
+                icon.setAttribute('data-lucide', isPassword ? 'eye-off' : 'eye');
+                lucide.createIcons();
+            }
+        }
+        
+        // Make function globally accessible
+        window.togglePasswordVisibility = togglePasswordVisibility;
+
         // Show toast notification
         function showToast(title, description, variant = 'default') {
             const toast = document.createElement('div');
@@ -1184,7 +1229,7 @@
 
             showToast(
                 "Login Successful",
-                "Welcome back! Redirecting to dashboard...",
+                "Welcome! Redirecting to dashboard...",
                 "default"
             );
 
@@ -1310,5 +1355,3 @@
     </script>
 </body>
 </html>
-
-
