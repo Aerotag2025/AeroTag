@@ -172,7 +172,7 @@
             <!-- Home Tab Content -->
             <div id="content-home" class="dashboard-content">
                 <div class="mb-8">
-                    <h1 class="text-3xl font-bold text-white mb-2">Welcome to AeroTag!</h1>
+                    <h1 class="text-3xl font-bold text-white mb-2">Welcome Back!</h1>
                     <p class="text-slate-400">Monitor and manage your headset fleet from here.</p>
                 </div>
 
@@ -380,7 +380,7 @@
 
         <!-- About Section -->
         <section id="about" class="py-20 bg-slate-950">
-            <div class="container mx-auto px-4">
+        <div class="container mx-auto px-4">
                 <div class="max-w-4xl mx-auto text-center">
                     <span class="text-cyan-400 font-semibold text-sm uppercase tracking-wider">About</span>
                     <h2 class="text-3xl md:text-4xl font-bold mt-2 mb-6 text-white">
@@ -400,8 +400,8 @@
                             <h3 class="text-xl font-bold text-white mb-3">Why Choose Us</h3>
                             <p class="text-slate-400">
                                 Built by future aviation professionals. We understand the unique challenges of ground crew operations and have designed our system to address them directly.
-                            </p>
-                        </div>
+                    </p>
+                </div>
                     </div>
                 </div>
             </div>
@@ -419,7 +419,7 @@
                         <p class="text-slate-400 text-lg max-w-2xl mx-auto">
                             Have questions or need support? We're here to help.
                         </p>
-                    </div>
+                </div>
 
                     <div class="grid md:grid-cols-3 gap-8">
                         <div class="bg-slate-800/50 border border-slate-700 rounded-xl p-6 text-center">
@@ -428,12 +428,12 @@
                             </div>
                             <h3 class="text-white font-semibold mb-2">Email</h3>
                             <p class="text-slate-400 text-sm">aerotag2025@gmail.com</p>
-                        </div>
+                </div>
 
                         <div class="bg-slate-800/50 border border-slate-700 rounded-xl p-6 text-center">
                             <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-cyan-400 rounded-lg flex items-center justify-center mx-auto mb-4">
                                 <i data-lucide="phone" class="w-6 h-6 text-white"></i>
-                            </div>
+                        </div>
                             <h3 class="text-white font-semibold mb-2">Phone</h3>
                             <p class="text-slate-400 text-sm">+1 (555) 123-4567</p>
                         </div>
@@ -441,12 +441,12 @@
                         <div class="bg-slate-800/50 border border-slate-700 rounded-xl p-6 text-center">
                             <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-cyan-400 rounded-lg flex items-center justify-center mx-auto mb-4">
                                 <i data-lucide="map-pin" class="w-6 h-6 text-white"></i>
-                            </div>
+                        </div>
                             <h3 class="text-white font-semibold mb-2">Location</h3>
                             <p class="text-slate-400 text-sm">Batangas, Philippines</p>
-                        </div>
                     </div>
                 </div>
+            </div>
             </div>
         </section>
     </main>
@@ -745,8 +745,14 @@
         initializeAdmin();
         initializeDefaultTags();
 
-        // Check if user is logged in on page load
-        checkAuthStatus();
+        // Check if user is logged in on page load (after DOM is ready)
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', function() {
+                setTimeout(checkAuthStatus, 100);
+            });
+        } else {
+            setTimeout(checkAuthStatus, 100);
+        }
 
         // Modal state
         let currentMode = 'login';
@@ -919,27 +925,53 @@
             }, 50);
         }
         
-        // Make function globally accessible
+        // Make functions globally accessible
         window.switchDashboardTab = switchDashboardTab;
+        window.setupSidebarListeners = setupSidebarListeners;
+        window.showDashboard = showDashboard;
+        window.openCreateTagModal = openCreateTagModal;
+        window.closeTagModal = closeTagModal;
+        window.editTag = editTag;
+        window.deleteTag = deleteTag;
+        window.handleTagSubmit = handleTagSubmit;
+        window.handleLogin = handleLogin;
+        window.handleSignup = handleSignup;
+        window.handleLogout = handleLogout;
+        window.openAuthModal = openAuthModal;
+        window.closeAuthModal = closeAuthModal;
         
         // Set up event listeners for sidebar buttons
         function setupSidebarListeners() {
             // Remove all existing listeners and add new ones
-            document.querySelectorAll('.sidebar-btn[data-tab]').forEach(btn => {
-                // Use onclick as fallback and also addEventListener
+            const sidebarButtons = document.querySelectorAll('.sidebar-btn[data-tab]');
+            if (sidebarButtons.length === 0) {
+                // Buttons not found yet, try again after a short delay
+                setTimeout(setupSidebarListeners, 200);
+                return;
+            }
+            
+            sidebarButtons.forEach(btn => {
+                // Remove existing onclick to prevent duplicates
+                btn.onclick = null;
+                // Use onclick for reliable event handling
                 const tab = btn.getAttribute('data-tab');
                 if (tab) {
                     btn.onclick = function(e) {
                         e.preventDefault();
-                        switchDashboardTab(tab);
+                        e.stopPropagation();
+                        if (window.switchDashboardTab) {
+                            window.switchDashboardTab(tab);
+                        } else {
+                            switchDashboardTab(tab);
+                        }
                     };
                 }
             });
         }
         
-        // Also set up listeners on page load
+        // Also set up listeners on page load (in case dashboard is already visible)
         document.addEventListener('DOMContentLoaded', function() {
-            setupSidebarListeners();
+            setTimeout(setupSidebarListeners, 100);
         });
 
         // Tag Management Functions
@@ -1126,7 +1158,7 @@
             const user = users.find(u => u.email === email);
             
             if (!user) {
-                showToast(
+            showToast(
                     "Login Failed",
                     "No account found with this email address.",
                     "destructive"
@@ -1180,7 +1212,7 @@
             }
 
             if (password.length < 6) {
-                showToast(
+            showToast(
                     "Password Too Short",
                     "Password must be at least 6 characters long.",
                     "destructive"
@@ -1278,4 +1310,5 @@
     </script>
 </body>
 </html>
+
 
