@@ -79,6 +79,24 @@
         .toast.destructive {
             background: #7f1d1d;
         }
+        
+        /* Sidebar transitions for mobile */
+        @media (max-width: 768px) {
+            #sidebar {
+                transition: transform 0.3s ease-in-out;
+            }
+            #sidebar.hidden {
+                transform: translateX(-100%);
+            }
+            #sidebar:not(.hidden) {
+                transform: translateX(0);
+            }
+        }
+        
+        /* Mobile menu transitions */
+        #mobileMenu {
+            transition: max-height 0.3s ease-out, opacity 0.3s ease-out;
+        }
     </style>
 </head>
 <body class="min-h-screen flex flex-col bg-slate-950">
@@ -99,14 +117,29 @@
                     <a href="#contact" class="text-slate-300 hover:text-white transition-colors">Contact</a>
                 </nav>
 
-                <div class="flex items-center gap-3">
-                    <button onclick="openAuthModal('login')" class="px-4 py-2 text-slate-300 hover:text-white hover:bg-slate-800 rounded-md transition-colors">
+                <div class="flex items-center gap-2 md:gap-3">
+                    <button onclick="openAuthModal('login')" class="hidden sm:block px-3 md:px-4 py-2 text-sm md:text-base text-slate-300 hover:text-white hover:bg-slate-800 rounded-md transition-colors">
                         Log In
                     </button>
-                    <button onclick="openAuthModal('signup')" class="px-4 py-2 bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white rounded-md transition-colors">
+                    <button onclick="openAuthModal('signup')" class="px-3 md:px-4 py-2 text-sm md:text-base bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white rounded-md transition-colors">
                         Sign Up
                     </button>
+                    <button onclick="toggleMobileMenu()" class="md:hidden p-2 text-slate-300 hover:text-white hover:bg-slate-800 rounded-md transition-colors">
+                        <i data-lucide="menu" class="w-5 h-5"></i>
+                    </button>
                 </div>
+            </div>
+            
+            <!-- Mobile Menu -->
+            <div id="mobileMenu" class="hidden md:hidden mt-4 pb-4 border-t border-slate-800 pt-4">
+                <nav class="flex flex-col gap-4">
+                    <a href="#features" onclick="toggleMobileMenu()" class="text-slate-300 hover:text-white transition-colors">Features</a>
+                    <a href="#about" onclick="toggleMobileMenu()" class="text-slate-300 hover:text-white transition-colors">About</a>
+                    <a href="#contact" onclick="toggleMobileMenu()" class="text-slate-300 hover:text-white transition-colors">Contact</a>
+                    <button onclick="openAuthModal('login'); toggleMobileMenu();" class="text-left px-0 py-2 text-slate-300 hover:text-white transition-colors">
+                        Log In
+                    </button>
+                </nav>
             </div>
         </div>
     </header>
@@ -118,16 +151,19 @@
             <div class="container mx-auto px-4 py-4">
                 <div class="flex items-center justify-between">
                     <div class="flex items-center gap-2">
-                        <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-cyan-400 rounded-lg flex items-center justify-center">
-                            <i data-lucide="headphones" class="w-6 h-6 text-white"></i>
+                        <button onclick="toggleSidebar()" class="md:hidden p-2 text-slate-300 hover:text-white hover:bg-slate-800 rounded-md transition-colors">
+                            <i data-lucide="menu" class="w-5 h-5"></i>
+                        </button>
+                        <div class="w-8 h-8 md:w-10 md:h-10 bg-gradient-to-br from-blue-500 to-cyan-400 rounded-lg flex items-center justify-center">
+                            <i data-lucide="headphones" class="w-5 h-5 md:w-6 md:h-6 text-white"></i>
                         </div>
-                        <span class="text-xl font-bold text-white">AeroTag Dashboard</span>
+                        <span class="text-lg md:text-xl font-bold text-white">AeroTag Dashboard</span>
                     </div>
-                    <div class="flex items-center gap-4">
-                        <span id="userName" class="text-slate-300 text-sm"></span>
-                        <button onclick="handleLogout()" class="px-4 py-2 text-slate-300 hover:text-white hover:bg-slate-800 rounded-md transition-colors flex items-center gap-2">
+                    <div class="flex items-center gap-2 md:gap-4">
+                        <span id="userName" class="hidden sm:block text-slate-300 text-xs md:text-sm"></span>
+                        <button onclick="handleLogout()" class="px-3 md:px-4 py-2 text-xs md:text-sm text-slate-300 hover:text-white hover:bg-slate-800 rounded-md transition-colors flex items-center gap-1 md:gap-2">
                             <i data-lucide="log-out" class="w-4 h-4"></i>
-                            Logout
+                            <span class="hidden sm:inline">Logout</span>
                         </button>
                     </div>
                 </div>
@@ -137,7 +173,13 @@
         <!-- Dashboard Layout with Sidebar -->
         <div class="flex flex-1 overflow-hidden">
             <!-- Sidebar -->
-            <aside class="w-64 bg-slate-900/50 border-r border-slate-800 flex-shrink-0">
+            <aside id="sidebar" class="hidden md:block fixed md:relative inset-y-0 left-0 z-40 w-64 bg-slate-900/50 border-r border-slate-800 flex-shrink-0 h-full md:h-auto">
+                <div class="flex items-center justify-between p-4 border-b border-slate-800 md:hidden">
+                    <span class="text-white font-semibold">Menu</span>
+                    <button onclick="toggleSidebar()" class="p-2 text-slate-300 hover:text-white hover:bg-slate-800 rounded-md transition-colors">
+                        <i data-lucide="x" class="w-5 h-5"></i>
+                    </button>
+                </div>
                 <nav class="p-4 space-y-2">
                     <button 
                         id="tab-home"
@@ -166,81 +208,95 @@
                 </nav>
             </aside>
 
+            <!-- Sidebar Overlay (Mobile) -->
+            <div id="sidebarOverlay" class="hidden fixed inset-0 bg-black/50 z-30 md:hidden" onclick="toggleSidebar()"></div>
+
             <!-- Dashboard Content -->
-            <main class="flex-1 overflow-y-auto">
-                <div class="container mx-auto px-4 py-8">
+            <main class="flex-1 overflow-y-auto w-full md:w-auto">
+                <div class="container mx-auto px-4 py-4 md:py-8">
             <!-- Home Tab Content -->
             <div id="content-home" class="dashboard-content">
-                <div class="mb-8">
-                    <h1 class="text-3xl font-bold text-white mb-2">Welcome to AeroTag!</h1>
-                    <p class="text-slate-400">Monitor and manage your headset fleet from here.</p>
+                <div class="mb-6 md:mb-8">
+                    <h1 class="text-2xl md:text-3xl font-bold text-white mb-2">Welcome Back!</h1>
+                    <p class="text-slate-400 text-sm md:text-base">Monitor and manage your headset fleet from here.</p>
                 </div>
 
-                <div class="grid md:grid-cols-3 gap-6 mb-8">
-                    <div class="bg-slate-800/50 border border-slate-700 rounded-xl p-6">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-6 md:mb-8">
+                    <div class="bg-slate-800/50 border border-slate-700 rounded-xl p-4 md:p-6">
                         <div class="flex items-center justify-between mb-4">
-                            <h3 class="text-slate-300 text-sm font-medium">Total Tags</h3>
-                            <i data-lucide="headphones" class="w-5 h-5 text-blue-400"></i>
+                            <h3 class="text-slate-300 text-xs md:text-sm font-medium">Total Tags</h3>
+                            <i data-lucide="headphones" class="w-4 h-4 md:w-5 md:h-5 text-blue-400"></i>
                         </div>
-                        <p class="text-3xl font-bold text-white" id="totalTags">0</p>
-                        <p class="text-slate-400 text-sm mt-2">Active units</p>
+                        <p class="text-2xl md:text-3xl font-bold text-white" id="totalTags">0</p>
+                        <p class="text-slate-400 text-xs md:text-sm mt-2">Active units</p>
                     </div>
 
-                    <div class="bg-slate-800/50 border border-slate-700 rounded-xl p-6">
+                    <div class="bg-slate-800/50 border border-slate-700 rounded-xl p-4 md:p-6">
                         <div class="flex items-center justify-between mb-4">
-                            <h3 class="text-slate-300 text-sm font-medium">Unsafe</h3>
-                            <i data-lucide="alert-triangle" class="w-5 h-5 text-red-400"></i>
+                            <h3 class="text-slate-300 text-xs md:text-sm font-medium">Safe</h3>
+                            <i data-lucide="shield-check" class="w-4 h-4 md:w-5 md:h-5 text-green-400"></i>
                         </div>
-                        <p class="text-3xl font-bold text-white" id="unsafeTags">0</p>
-                        <p class="text-slate-400 text-sm mt-2">Requires attention</p>
+                        <p class="text-2xl md:text-3xl font-bold text-white" id="safeTags">0</p>
+                        <p class="text-slate-400 text-xs md:text-sm mt-2">Operational</p>
                     </div>
 
-                    <div class="bg-slate-800/50 border border-slate-700 rounded-xl p-6">
+                    <div class="bg-slate-800/50 border border-slate-700 rounded-xl p-4 md:p-6">
                         <div class="flex items-center justify-between mb-4">
-                            <h3 class="text-slate-300 text-sm font-medium">Disconnected</h3>
-                            <i data-lucide="wifi-off" class="w-5 h-5 text-orange-400"></i>
+                            <h3 class="text-slate-300 text-xs md:text-sm font-medium">Unsafe</h3>
+                            <i data-lucide="alert-triangle" class="w-4 h-4 md:w-5 md:h-5 text-red-400"></i>
                         </div>
-                        <p class="text-3xl font-bold text-white" id="disconnectedTags">0</p>
-                        <p class="text-slate-400 text-sm mt-2">Offline units</p>
+                        <p class="text-2xl md:text-3xl font-bold text-white" id="unsafeTags">0</p>
+                        <p class="text-slate-400 text-xs md:text-sm mt-2">Requires attention</p>
+                    </div>
+
+                    <div class="bg-slate-800/50 border border-slate-700 rounded-xl p-4 md:p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-slate-300 text-xs md:text-sm font-medium">Disconnected</h3>
+                            <i data-lucide="wifi-off" class="w-4 h-4 md:w-5 md:h-5 text-orange-400"></i>
+                        </div>
+                        <p class="text-2xl md:text-3xl font-bold text-white" id="disconnectedTags">0</p>
+                        <p class="text-slate-400 text-xs md:text-sm mt-2">Offline units</p>
                     </div>
                 </div>
             </div>
 
             <!-- Headset Status Tab Content -->
             <div id="content-headset" class="dashboard-content hidden">
-                <div class="mb-8">
-                    <h1 class="text-3xl font-bold text-white mb-2">Headset Status</h1>
-                    <p class="text-slate-400">View and manage all AeroTag units in your fleet.</p>
+                <div class="mb-6 md:mb-8">
+                    <h1 class="text-2xl md:text-3xl font-bold text-white mb-2">Headset Status</h1>
+                    <p class="text-slate-400 text-sm md:text-base">View and manage all AeroTag units in your fleet.</p>
                 </div>
 
-                <div class="bg-slate-800/50 border border-slate-700 rounded-xl p-6 overflow-x-auto">
-                    <table class="w-full">
-                        <thead>
-                            <tr class="border-b border-slate-700">
-                                <th class="text-left py-4 px-4 text-slate-300 font-semibold">Tag</th>
-                                <th class="text-left py-4 px-4 text-slate-300 font-semibold">Status</th>
-                                <th class="text-left py-4 px-4 text-slate-300 font-semibold">Battery</th>
-                                <th class="text-left py-4 px-4 text-slate-300 font-semibold">Location</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tagsTableBody">
-                            <!-- Tags will be dynamically loaded here -->
-                        </tbody>
-                    </table>
+                <div class="bg-slate-800/50 border border-slate-700 rounded-xl p-3 md:p-6 overflow-x-auto">
+                    <div class="min-w-full inline-block">
+                        <table class="w-full min-w-[600px]">
+                            <thead>
+                                <tr class="border-b border-slate-700">
+                                    <th class="text-left py-3 md:py-4 px-2 md:px-4 text-slate-300 font-semibold text-xs md:text-sm">Tag</th>
+                                    <th class="text-left py-3 md:py-4 px-2 md:px-4 text-slate-300 font-semibold text-xs md:text-sm">Status</th>
+                                    <th class="text-left py-3 md:py-4 px-2 md:px-4 text-slate-300 font-semibold text-xs md:text-sm">Battery</th>
+                                    <th class="text-left py-3 md:py-4 px-2 md:px-4 text-slate-300 font-semibold text-xs md:text-sm">Location</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tagsTableBody">
+                                <!-- Tags will be dynamically loaded here -->
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
 
             <!-- Manage Tags Tab Content (Admin Only) -->
             <div id="content-manage" class="dashboard-content hidden">
-                <div class="mb-8">
-                    <div class="flex items-center justify-between">
+                <div class="mb-6 md:mb-8">
+                    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                         <div>
-                            <h1 class="text-3xl font-bold text-white mb-2">Manage Tags</h1>
-                            <p class="text-slate-400">Create, edit, and delete AeroTag units.</p>
+                            <h1 class="text-2xl md:text-3xl font-bold text-white mb-2">Manage Tags</h1>
+                            <p class="text-slate-400 text-sm md:text-base">Create, edit, and delete AeroTag units.</p>
                         </div>
                         <button 
                             onclick="openCreateTagModal()"
-                            class="px-4 py-2 bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white rounded-md transition-colors flex items-center gap-2"
+                            class="w-full sm:w-auto px-4 py-2 text-sm md:text-base bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white rounded-md transition-colors flex items-center justify-center gap-2"
                         >
                             <i data-lucide="plus" class="w-4 h-4"></i>
                             Create New Tag
@@ -248,21 +304,23 @@
                     </div>
                 </div>
 
-                <div class="bg-slate-800/50 border border-slate-700 rounded-xl p-6 overflow-x-auto">
-                    <table class="w-full">
-                        <thead>
-                            <tr class="border-b border-slate-700">
-                                <th class="text-left py-4 px-4 text-slate-300 font-semibold">Tag</th>
-                                <th class="text-left py-4 px-4 text-slate-300 font-semibold">Status</th>
-                                <th class="text-left py-4 px-4 text-slate-300 font-semibold">Battery</th>
-                                <th class="text-left py-4 px-4 text-slate-300 font-semibold">Location</th>
-                                <th class="text-left py-4 px-4 text-slate-300 font-semibold">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="manageTagsTableBody">
-                            <!-- Tags will be dynamically loaded here -->
-                        </tbody>
-                    </table>
+                <div class="bg-slate-800/50 border border-slate-700 rounded-xl p-3 md:p-6 overflow-x-auto">
+                    <div class="min-w-full inline-block">
+                        <table class="w-full min-w-[700px]">
+                            <thead>
+                                <tr class="border-b border-slate-700">
+                                    <th class="text-left py-3 md:py-4 px-2 md:px-4 text-slate-300 font-semibold text-xs md:text-sm">Tag</th>
+                                    <th class="text-left py-3 md:py-4 px-2 md:px-4 text-slate-300 font-semibold text-xs md:text-sm">Status</th>
+                                    <th class="text-left py-3 md:py-4 px-2 md:px-4 text-slate-300 font-semibold text-xs md:text-sm">Battery</th>
+                                    <th class="text-left py-3 md:py-4 px-2 md:px-4 text-slate-300 font-semibold text-xs md:text-sm">Location</th>
+                                    <th class="text-left py-3 md:py-4 px-2 md:px-4 text-slate-300 font-semibold text-xs md:text-sm">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="manageTagsTableBody">
+                                <!-- Tags will be dynamically loaded here -->
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
 
@@ -302,7 +360,7 @@
                     <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
                         <button 
                             onclick="openAuthModal('signup')"
-                            class="bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white px-8 py-6 text-lg rounded-md transition-colors flex items-center gap-2 group"
+                            class="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white px-6 md:px-8 py-4 md:py-6 text-base md:text-lg rounded-md transition-colors flex items-center justify-center gap-2 group"
                         >
                             Get Started
                             <i data-lucide="arrow-right" class="w-5 h-5 group-hover:translate-x-1 transition-transform"></i>
@@ -466,15 +524,15 @@
     <!-- Auth Modal -->
     <div id="authModal" class="hidden fixed inset-0 z-50 modal-overlay">
         <div class="fixed inset-0 bg-black/50" onclick="closeAuthModal()"></div>
-        <div class="fixed inset-0 flex items-center justify-center p-4">
-            <div class="bg-slate-900 border border-slate-800 rounded-lg shadow-xl max-w-md w-full modal-content">
-                <div class="p-6">
+        <div class="fixed inset-0 flex items-center justify-center p-4 overflow-y-auto">
+            <div class="bg-slate-900 border border-slate-800 rounded-lg shadow-xl max-w-md w-full my-4 modal-content">
+                <div class="p-4 md:p-6">
                     <div class="flex items-center justify-center mb-4">
                         <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-cyan-400 rounded-lg flex items-center justify-center">
                             <i data-lucide="headphones" class="w-7 h-7 text-white"></i>
                         </div>
                     </div>
-                    <h2 class="text-center text-2xl text-white mb-6">
+                    <h2 class="text-center text-xl md:text-2xl text-white mb-4 md:mb-6">
                         Welcome to AeroTag
                     </h2>
 
@@ -644,11 +702,11 @@
     <!-- Create/Edit Tag Modal -->
     <div id="tagModal" class="hidden fixed inset-0 z-50 modal-overlay">
         <div class="fixed inset-0 bg-black/50" onclick="closeTagModal()"></div>
-        <div class="fixed inset-0 flex items-center justify-center p-4">
-            <div class="bg-slate-900 border border-slate-800 rounded-lg shadow-xl max-w-md w-full modal-content">
-                <div class="p-6">
-                    <div class="flex items-center justify-between mb-6">
-                        <h2 class="text-2xl text-white font-bold" id="tagModalTitle">Create New Tag</h2>
+        <div class="fixed inset-0 flex items-center justify-center p-4 overflow-y-auto">
+            <div class="bg-slate-900 border border-slate-800 rounded-lg shadow-xl max-w-md w-full my-4 modal-content">
+                <div class="p-4 md:p-6">
+                    <div class="flex items-center justify-between mb-4 md:mb-6">
+                        <h2 class="text-xl md:text-2xl text-white font-bold" id="tagModalTitle">Create New Tag</h2>
                         <button onclick="closeTagModal()" class="text-slate-400 hover:text-white">
                             <i data-lucide="x" class="w-5 h-5"></i>
                         </button>
@@ -905,6 +963,14 @@
             
             currentDashboardTab = tab;
             
+            // Close sidebar on mobile when switching tabs
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            if (window.innerWidth < 768 && sidebar && overlay) {
+                sidebar.classList.add('hidden');
+                overlay.classList.add('hidden');
+            }
+            
             // Update sidebar buttons
             const tabs = ['home', 'headset', 'manage'];
             tabs.forEach(t => {
@@ -1004,10 +1070,12 @@
             
             // Update home page stats
             const totalTagsEl = document.getElementById('totalTags');
+            const safeTagsEl = document.getElementById('safeTags');
             const unsafeTagsEl = document.getElementById('unsafeTags');
             const disconnectedTagsEl = document.getElementById('disconnectedTags');
             
             if (totalTagsEl) totalTagsEl.textContent = tags.length;
+            if (safeTagsEl) safeTagsEl.textContent = tags.filter(t => t.status === 'Safe').length;
             if (unsafeTagsEl) unsafeTagsEl.textContent = tags.filter(t => t.status === 'Unsafe').length;
             if (disconnectedTagsEl) disconnectedTagsEl.textContent = tags.filter(t => t.status === 'Disconnected').length;
             
@@ -1016,16 +1084,16 @@
             if (tagsTableBody) {
                 tagsTableBody.innerHTML = tags.map(tag => `
                     <tr class="border-b border-slate-700 hover:bg-slate-800/50">
-                        <td class="py-4 px-4 text-white font-medium">${tag.name}</td>
-                        <td class="py-4 px-4">
-                            <span class="px-3 py-1 rounded text-xs font-medium ${
+                        <td class="py-3 md:py-4 px-2 md:px-4 text-white font-medium text-sm">${tag.name}</td>
+                        <td class="py-3 md:py-4 px-2 md:px-4">
+                            <span class="px-2 md:px-3 py-1 rounded text-xs font-medium ${
                                 tag.status === 'Safe' ? 'bg-green-500/20 text-green-400' :
                                 tag.status === 'Unsafe' ? 'bg-red-500/20 text-red-400' :
                                 'bg-orange-500/20 text-orange-400'
                             }">${tag.status}</span>
                         </td>
-                        <td class="py-4 px-4 text-white">${tag.battery !== null ? tag.battery + '%' : '-'}</td>
-                        <td class="py-4 px-4 text-slate-300">${tag.location}</td>
+                        <td class="py-3 md:py-4 px-2 md:px-4 text-white text-sm">${tag.battery !== null ? tag.battery + '%' : '-'}</td>
+                        <td class="py-3 md:py-4 px-2 md:px-4 text-slate-300 text-sm">${tag.location}</td>
                     </tr>
                 `).join('');
             }
@@ -1036,27 +1104,27 @@
                 if (manageTableBody) {
                     manageTableBody.innerHTML = tags.map(tag => `
                         <tr class="border-b border-slate-700 hover:bg-slate-800/50">
-                            <td class="py-4 px-4 text-white font-medium">${tag.name}</td>
-                            <td class="py-4 px-4">
-                                <span class="px-3 py-1 rounded text-xs font-medium ${
+                            <td class="py-3 md:py-4 px-2 md:px-4 text-white font-medium text-sm">${tag.name}</td>
+                            <td class="py-3 md:py-4 px-2 md:px-4">
+                                <span class="px-2 md:px-3 py-1 rounded text-xs font-medium ${
                                     tag.status === 'Safe' ? 'bg-green-500/20 text-green-400' :
                                     tag.status === 'Unsafe' ? 'bg-red-500/20 text-red-400' :
                                     'bg-orange-500/20 text-orange-400'
                                 }">${tag.status}</span>
                             </td>
-                            <td class="py-4 px-4 text-white">${tag.battery !== null ? tag.battery + '%' : '-'}</td>
-                            <td class="py-4 px-4 text-slate-300">${tag.location}</td>
-                            <td class="py-4 px-4">
-                                <div class="flex gap-2">
+                            <td class="py-3 md:py-4 px-2 md:px-4 text-white text-sm">${tag.battery !== null ? tag.battery + '%' : '-'}</td>
+                            <td class="py-3 md:py-4 px-2 md:px-4 text-slate-300 text-sm">${tag.location}</td>
+                            <td class="py-3 md:py-4 px-2 md:px-4">
+                                <div class="flex flex-col sm:flex-row gap-2">
                                     <button 
                                         onclick="editTag(${tag.id})"
-                                        class="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded text-xs transition-colors"
+                                        class="px-2 md:px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded text-xs transition-colors"
                                     >
                                         Edit
                                     </button>
                                     <button 
                                         onclick="deleteTag(${tag.id})"
-                                        class="px-3 py-1 bg-red-600 hover:bg-red-700 text-white rounded text-xs transition-colors"
+                                        class="px-2 md:px-3 py-1 bg-red-600 hover:bg-red-700 text-white rounded text-xs transition-colors"
                                     >
                                         Delete
                                     </button>
@@ -1171,8 +1239,30 @@
             }
         }
         
-        // Make function globally accessible
+        // Toggle mobile menu
+        function toggleMobileMenu() {
+            const mobileMenu = document.getElementById('mobileMenu');
+            if (mobileMenu) {
+                mobileMenu.classList.toggle('hidden');
+                lucide.createIcons();
+            }
+        }
+        
+        // Toggle sidebar (mobile)
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            if (sidebar && overlay) {
+                sidebar.classList.toggle('hidden');
+                overlay.classList.toggle('hidden');
+                lucide.createIcons();
+            }
+        }
+        
+        // Make functions globally accessible
         window.togglePasswordVisibility = togglePasswordVisibility;
+        window.toggleMobileMenu = toggleMobileMenu;
+        window.toggleSidebar = toggleSidebar;
 
         // Show toast notification
         function showToast(title, description, variant = 'default') {
@@ -1355,4 +1445,5 @@
     </script>
 </body>
 </html>
+
 
